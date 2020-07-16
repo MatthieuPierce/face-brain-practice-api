@@ -1,9 +1,12 @@
 const express = require('express');
+// const bcrypt = require('bcryptjs');
+const cors = require('cors');
 
 const app = express();
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
+app.use(cors());
 
 const database = {
   users: [
@@ -24,16 +27,23 @@ const database = {
       joined: new Date()
     },
   ],
-}
+  login: [
+    {
+      id: '988',
+      hash: '',
+      email: "john@example.com",
+    }
+  ]
+};
 
 app.get('/', (req, res) => {
   res.send(database.users);
-})
+});
 
 app.post('/signin', (req, res) => {
   if (req.body.email === database.users[0].email &&
       req.body.password === database.users[0].password) {
-        res.json('successful signin');      
+        res.json(database.users[0]);      
       } else {
         res.status(400).json(`error logging in`);
       }
@@ -42,6 +52,9 @@ app.post('/signin', (req, res) => {
 
 app.post('/register', (req, res) => {
   const { email, name, password } = req.body;
+  // bcrypt.hash(password, 8, function(err, hash) {
+  //   console.log(hash);
+  // });
   database.users.push(    {
     id: '125',
     name: name,
@@ -83,17 +96,24 @@ app.get('/profile/:id', (req, res)=> {
 
   })
 
+  // bcrypt.hash('bacon', 8, function(err, hash) {
+  // });
+
+  // // Load hash from your password DB.
+  // bcrypt.compare("B4c0/\/", hash, function(err, res) {
+  //   // res === true
+  // });
+  // bcrypt.compare("not_bacon", hash, function(err, res) {
+  //   // res === false
+  // });
+
+  // // As of bcryptjs 2.4.0, compare returns a promise if callback is omitted:
+  // bcrypt.compare("B4c0/\/", hash).then((res) => {
+  //   // res === true
+  // });
+
+
+
 app.listen(3002, ()=> {
   console.log(`server is running on port 3002`);
 });
-
-/*
-// Routes map
-
-/ --> GET = this is working
-/signin --> POST = success || fail
-/register --> POST = new user object/info
-/profile/:userId --> GET user
-/image --> PUT --> user (with updated image)
-
-*/
