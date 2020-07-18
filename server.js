@@ -1,12 +1,25 @@
 const express = require('express');
 // const bcrypt = require('bcryptjs');
 const cors = require('cors');
-
 const app = express();
+const knex = require('knex');
+
+const postgres = knex({
+  client: 'pg',
+  connection: {
+    host : '127.0.0.1',
+    user : 'matthieu',
+    password : '',
+    database : 'face-brain'
+  }
+});
+
+console.log(postgres.select('*').from('users'));
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(cors());
+
 
 const database = {
   users: [
