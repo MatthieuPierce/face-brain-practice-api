@@ -14,55 +14,31 @@ const db = knex({
   }
 });
 
-db  .select('*').from('users').then(data => {
-  console.log(data);
-});
-
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(cors());
-
-
-const database = {
-  users: [
-    {
-      id: '123',
-      name: 'John',
-      email: 'john@email.com',
-      password: 'cookies',
-      entries: 0,
-      joined: new Date()
-    },
-    {
-      id: '124',
-      name: 'sally',
-      email: 'sally@email.com',
-      password: 'bananas',
-      entries: 0,
-      joined: new Date()
-    },
-  ],
-  login: [
-    {
-      id: '988',
-      hash: '',
-      email: "john@example.com",
-    }
-  ]
-};
 
 app.get('/', (req, res) => {
   res.send(database.users);
 });
 
 app.post('/signin', (req, res) => {
-  if (req.body.email === database.users[0].email &&
-      req.body.password === database.users[0].password) {
-        res.json(database.users[0]);      
+  db.select('email', 'hash').from('login')
+    .where('email', '=', req.body.email)
+    .then(data => {
+      let isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+      if (isValid) {
+        return db.select('*').from('users')
+          .where('email', '=', req.body.email)
+          .then(user => {
+            res.json(user[0])
+          })
+          .catch(err => res.status(400).json('unable to get user'))
       } else {
-        res.status(400).json(`error logging in`);
+        res.status(400).json('wrong credentials');
       }
-  res.json(`signin post working`)
+    })
+    .catch(err => res.status(400).json('wrong credentials'))
 })
 
 app.post('/register', (req, res) => {
@@ -120,24 +96,6 @@ app.get('/profile/:id', (req, res)=> {
         )
       .catch(err => res.status(400).json('unable to put entry count'));
   })
-
-  // bcrypt.hash('bacon', 8, function(err, hash) {
-  // });
-
-  // // Load hash from your password DB.
-  // bcrypt.compare("B4c0/\/", hash, function(err, res) {
-  //   // res === true
-  // });
-  // bcrypt.compare("not_bacon", hash, function(err, res) {
-  //   // res === false
-  // });
-
-  // // As of bcryptjs 2.4.0, compare returns a promise if callback is omitted:
-  // bcrypt.compare("B4c0/\/", hash).then((res) => {
-  //   // res === true
-  // });
-
-
 
 app.listen(3002, ()=> {
   console.log(`server is running on port 3002`);
