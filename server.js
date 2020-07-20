@@ -8,7 +8,6 @@ const signin = require('./controllers/signin.js');
 const profile = require('./controllers/profile.js');
 const image = require('./controllers/image.js');
 
-
 const db = knex({
   client: 'pg',
   connection: {
@@ -37,6 +36,7 @@ app.get('/profile/:id', (req, res) => {
 })
 
 app.put('/image', (req, res) => image.handleImage(req, res, db))
+app.post('/imageurl', (req, res) => {image.handleApiCall(req, res)})
 
 app.listen(3002, ()=> {
   console.log(`server is running on port 3002`);
